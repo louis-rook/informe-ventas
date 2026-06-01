@@ -1,15 +1,11 @@
 [theme]
-primaryColor = "#1d4ed8"
-backgroundColor = "#f8fafc"
-secondaryBackgroundColor = "#e8eef7"
-textColor = "#1e293b"
+# Tema oscuro base para Streamlit Cloud (la app además inyecta su propio CSS)
+base = "dark"
+primaryColor = "#F57F17"
+backgroundColor = "#0A1628"
+secondaryBackgroundColor = "#0D2137"
+textColor = "#E2E8F0"
 font = "sans serif"
 
 [server]
 headless = true
-port = 8501
-
-[browser]
-gatherUsageStats = false
-serverAddress = "localhost"
-serverPort = 8501
