@@ -719,21 +719,34 @@ _LOGO_CACHE = {}
 
 
 def _klarens_logo_html() -> str:
-    """Busca un logo en assets/klarens.{png,svg,jpg}; si no existe, placeholder."""
+    """
+    Busca cualquier archivo que empiece por 'klarens' en assets/ sin importar
+    mayúsculas (Linux/Streamlit Cloud distingue mayúsculas, Windows no).
+    Si no existe, muestra un placeholder.
+    """
     import os, base64
     if 'html' in _LOGO_CACHE:
         return _LOGO_CACHE['html']
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     assets   = os.path.join(base_dir, 'assets')
-    mimes    = {'png': 'image/png', 'svg': 'image/svg+xml',
-                'jpg': 'image/jpeg', 'jpeg': 'image/jpeg'}
-    for ext, mime in mimes.items():
-        p = os.path.join(assets, f'klarens.{ext}')
-        if os.path.exists(p):
-            with open(p, 'rb') as f:
-                b64 = base64.b64encode(f.read()).decode()
-            _LOGO_CACHE['html'] = f'<img class="klarens-logo" src="data:{mime};base64,{b64}" alt="Klarens">'
-            return _LOGO_CACHE['html']
+    mimes    = {'.png': 'image/png', '.svg': 'image/svg+xml',
+                '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp'}
+    try:
+        archivos = os.listdir(assets)
+    except FileNotFoundError:
+        archivos = []
+    # Coincidencia tolerante: nombre que empiece por 'klarens' y extensión válida
+    for fname in archivos:
+        name_low = fname.lower()
+        if name_low.startswith('klarens'):
+            ext = os.path.splitext(name_low)[1]
+            mime = mimes.get(ext)
+            if mime:
+                p = os.path.join(assets, fname)
+                with open(p, 'rb') as f:
+                    b64 = base64.b64encode(f.read()).decode()
+                _LOGO_CACHE['html'] = f'<img class="klarens-logo" src="data:{mime};base64,{b64}" alt="Klarens">'
+                return _LOGO_CACHE['html']
     _LOGO_CACHE['html'] = '<div class="klarens-placeholder">K</div>'
     return _LOGO_CACHE['html']
 
