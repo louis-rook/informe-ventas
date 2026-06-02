@@ -72,6 +72,45 @@ DARK_CSS = """<style>
     margin-left:2px;
 }
 
+/* ── NAVEGACIÓN NATIVA (st.page_link) tema oscuro ── */
+.abad-brand{
+    display:flex;align-items:center;gap:10px;
+    padding:6px 8px 10px 8px;
+    border-bottom:1px solid rgba(21,101,192,.2);
+    margin-bottom:6px;
+}
+.abad-brand .logo{font-size:1.4rem;line-height:1}
+.abad-brand .brand-text{font-size:.95rem;font-weight:700;color:#e2e8f0;white-space:nowrap}
+.admin-sep{
+    height:1px;background:rgba(21,101,192,.25);
+    margin:14px 6px 8px 6px;
+}
+/* Links de página nativos */
+a[data-testid="stPageLink-NavLink"]{
+    border-radius:8px!important;
+    padding:8px 12px!important;
+    margin:1px 0!important;
+    transition:background .12s,border-color .12s!important;
+    border-left:3px solid transparent!important;
+}
+a[data-testid="stPageLink-NavLink"]:hover{
+    background:rgba(21,101,192,.28)!important;
+    border-left-color:#1565C0!important;
+}
+a[data-testid="stPageLink-NavLink"] p,
+a[data-testid="stPageLink-NavLink"] span{
+    color:#cfd8e3!important;font-size:.88rem!important;font-weight:500!important;
+}
+a[data-testid="stPageLink-NavLink"]:hover p,
+a[data-testid="stPageLink-NavLink"]:hover span{color:#fff!important}
+/* Página activa */
+a[data-testid="stPageLink-NavLink"][aria-current="page"]{
+    background:linear-gradient(90deg,rgba(245,127,23,.18),rgba(21,101,192,.14))!important;
+    border-left-color:#F57F17!important;
+}
+a[data-testid="stPageLink-NavLink"][aria-current="page"] p,
+a[data-testid="stPageLink-NavLink"][aria-current="page"] span{color:#fff!important;font-weight:700!important}
+
 /* ─────────────────────────────────────────────────────────────────────────
    SIDEBAR
    Pantallas normales (>1100px): EXPANDIDO (215px, iconos + texto), siempre visible.
@@ -94,6 +133,10 @@ div[data-testid="stSidebar"],
     z-index:999;
     position:relative!important;
 }
+/* Contenido del sidebar arranca DEBAJO del banner Klarens (58px) */
+section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"]{
+    padding-top:66px!important;
+}
 /* Wrappers internos siguen el ancho del padre */
 section[data-testid="stSidebar"] > div,
 section[data-testid="stSidebar"] [data-testid="stSidebarContent"],
@@ -101,7 +144,9 @@ section[data-testid="stSidebar"] [data-testid="stSidebarUserContent"]{
     width:100%!important;
     min-width:100%!important;
     max-width:100%!important;
-    padding:0!important;
+    padding-left:0!important;
+    padding-right:0!important;
+    padding-bottom:0!important;
     overflow:hidden!important;
 }
 
@@ -761,39 +806,38 @@ def top_banner() -> None:
     )
 
 
+# Páginas para navegación NATIVA (st.page_link) — usa rutas de archivo.
+# La navegación nativa es client-side: cambia de página sin recargar todo
+# el frontend (sin pantalla blanca), parecido al router de Next.js.
+_NAV_PAGES = [
+    ('app.py',                   '📊', 'Reporte'),
+    ('pages/2_Canal_Ventas.py',  '🏪', 'Canal Ventas'),
+    ('pages/3_Vendedor.py',      '👤', 'Vendedor'),
+    ('pages/4_Producto.py',      '📦', 'Producto'),
+    ('pages/5_Punto_Venta.py',   '🏬', 'Punto Venta'),
+    ('pages/6_Leche.py',         '🥛', 'Leche'),
+    ('pages/7_Suero.py',         '🧴', 'Suero'),
+    ('pages/8_Margenes.py',      '📈', 'Márgenes'),
+    ('pages/9_Descuentos.py',    '🎁', 'Descuentos'),
+    ('pages/10_Financiero.py',   '💼', 'Financiero'),
+]
+_ADMIN_PAGES = [
+    ('pages/1_Importar_Data.py', '⚙️', 'Importar Data'),
+]
+
+
 def minimal_sidebar() -> None:
-    """Navegación HTML pura — control total sobre tamaños e iconos."""
-    top_banner()  # banner superior con logo en cada página
-    items_html = ''.join(
-        f'<a class="nav-item" href="{href}" target="_self">'
-        f'<span class="nav-icon">{icon}</span>'
-        f'<span class="nav-label">{label}</span>'
-        f'</a>'
-        for icon, label, href in _NAV_ITEMS
-    )
-    admin_html = ''.join(
-        f'<a class="nav-item nav-admin" href="{href}" target="_self" title="{label}">'
-        f'<span class="nav-icon">{icon}</span>'
-        f'<span class="nav-label">{label}</span>'
-        f'</a>'
-        for icon, label, href in _ADMIN_ITEMS
-    )
-    nav_html = f"""
-<div class="abad-nav">
-  <div class="brand">
-    <span class="logo">📊</span>
-    <span class="brand-text">ABAD</span>
-  </div>
-  <hr>
-  {items_html}
-  <div class="abad-nav-bottom">
-    <div class="admin-divider"></div>
-    {admin_html}
-  </div>
-</div>
-"""
+    """
+    Navegación NATIVA de Streamlit (st.page_link) → transición client-side
+    sin recargar todo el frontend (sin pantalla blanca al cambiar de módulo).
+    """
+    top_banner()
     with st.sidebar:
-        st.markdown(nav_html, unsafe_allow_html=True)
+        for path, icon, label in _NAV_PAGES:
+            st.page_link(path, label=label, icon=icon)
+        st.markdown('<div class="admin-sep"></div>', unsafe_allow_html=True)
+        for path, icon, label in _ADMIN_PAGES:
+            st.page_link(path, label=label, icon=icon)
 
 
 # ── Period pills (inline, dentro del módulo) ──────────────────────────────────
